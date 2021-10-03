@@ -97,7 +97,11 @@ public class Lexer {
 				tokenPos++;
 				switch (ch) {
 				case '+':
-					token = Symbol.PLUS;
+					if (input[tokenPos] == '+') {
+						tokenPos++;
+						token = Symbol.CONCAT;
+					} else
+						token = Symbol.PLUS;
 					break;
 				case '-':
 					token = Symbol.MINUS;

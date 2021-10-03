@@ -19,6 +19,7 @@ import ast.StatementList;
 import ast.UnaryExpr;
 import ast.Variable;
 import ast.WhileStat;
+import ast.Type;
 import ast.VariableExpr;
 import lexer.Lexer;
 import lexer.Symbol;
@@ -61,10 +62,7 @@ public class Compiler {
 
 		while (lexer.token == Symbol.VAR) {
 			lexer.nextToken();
-			if (lexer.token != Symbol.INTEGER) {
-				error.signal("Type of variable expected");
-			}
-			lexer.nextToken();
+			Type varType = type();
 			String name = lexer.getStringValue();
 			ident();
 
@@ -75,7 +73,7 @@ public class Compiler {
 			if (symbolTable.get(name) != null)
 				error.signal("Variable " + name + " has already been declared");
 
-			Variable v = new Variable(name);
+			Variable v = new Variable(name, varType);
 
 			symbolTable.put(name, v);
 
@@ -85,6 +83,27 @@ public class Compiler {
 		}
 		return arrayVariable;
 	}
+	
+	private Type type() {
+        Type result;
+
+        switch ( lexer.token ) {
+            case INTEGER :
+              result = Type.integerType;
+              break;
+            case BOOLEAN :
+              result = Type.booleanType;
+              break;
+            case STRING :
+              result = Type.stringType;
+              break;
+            default :
+              error.signal("Type expected");
+              result = null;
+        }
+        lexer.nextToken();
+        return result;
+    }
 
 	private Statement stat() {
 		switch (lexer.token) {
