@@ -4,9 +4,11 @@ public enum Symbol {
 
     AND("&&"),
     ASSIGN("="),
+    BOOLEAN("Boolean"),
     CHARACTER("character"),
     COLON(":"),
     COMMA(","),
+    CONCAT("++"),
     DIV("/"),
     DOUBLEDOTS(".."),
     ELSE("else"),
@@ -36,6 +38,7 @@ public enum Symbol {
     RIGHTCURL("}"),
     RIGHTPAR(")"),
     SEMICOLON(";"),
+    STRING("String"),
     VAR("var"),
     WHILE("while");
 
