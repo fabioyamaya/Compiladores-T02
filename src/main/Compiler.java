@@ -17,6 +17,7 @@ import ast.Program;
 import ast.Statement;
 import ast.StatementList;
 import ast.UnaryExpr;
+import ast.VarListStat;
 import ast.Variable;
 import ast.WhileStat;
 import ast.Type;
@@ -44,20 +45,20 @@ public class Compiler {
 	}
 
 	private Program program() {
-		ArrayList<Variable> arrayVariable = null;
+		//ArrayList<Variable> arrayVariable = null;
 		ArrayList<Statement> arrayStat = new ArrayList<Statement>();
 
-		arrayVariable = varList();
+		//arrayVariable = varList();
 
 		while (lexer.token != Symbol.EOF) {
 			arrayStat.add(stat());
 		}
 
 		StatementList statList = new StatementList(arrayStat);
-		return new Program(arrayVariable, statList);
+		return new Program(statList);
 	}
 
-	private ArrayList<Variable> varList() {
+	private Statement varList() {
 		ArrayList<Variable> arrayVariable = new ArrayList<Variable>();
 
 		while (lexer.token == Symbol.VAR) {
@@ -81,7 +82,7 @@ public class Compiler {
 
 			lexer.nextToken();
 		}
-		return arrayVariable;
+		return new VarListStat(arrayVariable);
 	}
 	
 	private Type type() {
@@ -119,6 +120,8 @@ public class Compiler {
 			return printLnStat();
 		case WHILE:
 			return whileStat();
+		case VAR:
+			return varList();
 		default:
 			error.signal("Statement expected");
 		}

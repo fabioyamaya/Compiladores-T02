@@ -11,8 +11,7 @@ import java.util.Map;
 
 public class Program {
 
-	public Program(ArrayList<Variable> arrayVariable, StatementList statementList) {
-		this.arrayVariable = arrayVariable;
+	public Program(StatementList statementList) {
 		this.statementList = statementList;
 	}
 
@@ -22,10 +21,7 @@ public class Program {
 		pw.println("void main() {", true);
 
 		pw.add();
-		// generate code for the declaration of variables
-		for (Variable v : arrayVariable) {
-			pw.println("int" + " " + v.getName() + ";", true);
-		}
+
 		pw.println("",true);
 		statementList.genC(pw);
 		pw.sub();
@@ -36,6 +32,5 @@ public class Program {
 		statementList.run(memory);
 	}
 
-	private ArrayList<Variable> arrayVariable;
 	private StatementList statementList;
 }

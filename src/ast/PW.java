@@ -21,8 +21,8 @@ public class PW {
 		currentIndent = indent;
 	}
 
-	public void print(String s, boolean newLine) {
-		if (newLine) {
+	public void print(String s, boolean ident) {
+		if (ident) {
 			out.print(space.substring(0, currentIndent));
 			System.out.print(space.substring(0, currentIndent));
 		}
