@@ -3,6 +3,7 @@ package main;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Stack;
 
 import ast.AssignStat;
 import ast.CompilerError;
@@ -28,7 +29,7 @@ import lexer.Symbol;
 public class Compiler {
 
 	public Program compile(char[] input, PrintWriter outError) {
-		symbolTable = new Hashtable<String, Variable>();
+		symbolTableStack = new ArrayList<Hashtable<String, Variable>>();
 		error = new CompilerError(outError);
 		lexer = new Lexer(input, error);
 		error.setLexer(lexer);
@@ -45,10 +46,10 @@ public class Compiler {
 	}
 
 	private Program program() {
-		//ArrayList<Variable> arrayVariable = null;
+		Hashtable<String, Variable> symbolTable = new Hashtable<String, Variable>();
 		ArrayList<Statement> arrayStat = new ArrayList<Statement>();
 
-		//arrayVariable = varList();
+		symbolTableStack.add(symbolTable);
 
 		while (lexer.token != Symbol.EOF) {
 			arrayStat.add(stat());
@@ -71,12 +72,12 @@ public class Compiler {
 				error.signal("Missing semicolon");
 			}
 
-			if (symbolTable.get(name) != null)
+			if (symbolTableStack.get(symbolTableStack.size() - 1).get(name) != null)
 				error.signal("Variable " + name + " has already been declared");
 
 			Variable v = new Variable(name, varType);
 
-			symbolTable.put(name, v);
+			symbolTableStack.get(symbolTableStack.size() - 1).put(name, v);
 
 			arrayVariable.add(v);
 
@@ -84,27 +85,27 @@ public class Compiler {
 		}
 		return new VarListStat(arrayVariable);
 	}
-	
-	private Type type() {
-        Type result;
 
-        switch ( lexer.token ) {
-            case INTEGER :
-              result = Type.integerType;
-              break;
-            case BOOLEAN :
-              result = Type.booleanType;
-              break;
-            case STRING :
-              result = Type.stringType;
-              break;
-            default :
-              error.signal("Type expected");
-              result = null;
-        }
-        lexer.nextToken();
-        return result;
-    }
+	private Type type() {
+		Type result;
+
+		switch (lexer.token) {
+		case INTEGER:
+			result = Type.integerType;
+			break;
+		case BOOLEAN:
+			result = Type.booleanType;
+			break;
+		case STRING:
+			result = Type.stringType;
+			break;
+		default:
+			error.signal("Type expected");
+			result = null;
+		}
+		lexer.nextToken();
+		return result;
+	}
 
 	private Statement stat() {
 		switch (lexer.token) {
@@ -139,8 +140,11 @@ public class Compiler {
 	private AssignStat assignStat() {
 
 		String name = lexer.getStringValue();
+		Variable v = null;
 
-		Variable v = symbolTable.get(name);
+		for (int i = symbolTableStack.size() - 1; i >= 0 && v == null; i--) {
+			v = symbolTableStack.get(i).get(name);
+		}
 
 		if (v == null)
 			error.signal("Variable " + name + " was not declared");
@@ -185,14 +189,16 @@ public class Compiler {
 		String name = lexer.getStringValue();
 		ident();
 
-		Variable v = symbolTable.get(name);
+		Variable v = null;
+
+		for (int i = symbolTableStack.size() - 1; i >= 0 && v == null; i--) {
+			v = symbolTableStack.get(i).get(name);
+		}
 
 		if (v != null)
 			error.signal("Variable " + name + " has already been declared");
 
 		v = new Variable(name);
-
-		symbolTable.put(name, v);
 
 		if (lexer.token != Symbol.IN) {
 			error.signal("in keyword expected");
@@ -208,9 +214,8 @@ public class Compiler {
 		lexer.nextToken();
 		Expr endExpr = expr();
 
-		StatementList s = statList();
+		StatementList s = forStatList(v);
 
-		symbolTable.remove(name);
 		return new ForStat(v, startExpr, endExpr, s);
 	}
 
@@ -237,15 +242,46 @@ public class Compiler {
 
 	private StatementList statList() {
 		ArrayList<Statement> arrayStat = new ArrayList<Statement>();
+		Hashtable<String, Variable> symbolTableLocal = new Hashtable<String, Variable>();
+		
 
 		if (lexer.token != Symbol.LEFTCURL) {
 			error.signal("{ expected");
 		}
+		
+		symbolTableStack.add(symbolTableLocal);
+		
 		lexer.nextToken();
 		while (lexer.token != Symbol.RIGHTCURL) {
 			arrayStat.add(stat());
 		}
 		lexer.nextToken();
+		
+		symbolTableStack.remove(symbolTableStack.size()-1);
+
+		return new StatementList(arrayStat);
+	}
+	
+	
+	private StatementList forStatList(Variable forVar) {
+		ArrayList<Statement> arrayStat = new ArrayList<Statement>();
+		Hashtable<String, Variable> symbolTableLocal = new Hashtable<String, Variable>();
+
+		symbolTableLocal.put(forVar.getName(), forVar);
+
+		if (lexer.token != Symbol.LEFTCURL) {
+			error.signal("{ expected");
+		}
+		
+		symbolTableStack.add(symbolTableLocal);
+		
+		lexer.nextToken();
+		while (lexer.token != Symbol.RIGHTCURL) {
+			arrayStat.add(stat());
+		}
+		lexer.nextToken();
+		
+		symbolTableStack.remove(symbolTableStack.size()-1);
 
 		return new StatementList(arrayStat);
 	}
@@ -262,15 +298,26 @@ public class Compiler {
 
 	private Expr expr() {
 		Expr left, right;
-		left = andExpr();
+		left = orExpr();
 
+		if (lexer.token == Symbol.CONCAT) {
+			lexer.nextToken();
+			right = orExpr();
+			left = new CompositeExpr(left, Symbol.CONCAT, right);
+		}
+
+		return left;
+	}
+
+	private Expr orExpr() {
+		Expr left, right;
+		left = andExpr();
 		if (lexer.token == Symbol.OR) {
 			lexer.nextToken();
 			right = andExpr();
 
 			left = new CompositeExpr(left, Symbol.OR, right);
 		}
-
 		return left;
 	}
 
@@ -306,8 +353,7 @@ public class Compiler {
 		left = multExpr();
 
 		Symbol op;
-		while ( (op = lexer.token) == Symbol.PLUS ||
-	              op == Symbol.MINUS ) {
+		while ((op = lexer.token) == Symbol.PLUS || op == Symbol.MINUS) {
 			lexer.nextToken();
 			right = multExpr();
 
@@ -322,8 +368,7 @@ public class Compiler {
 
 		left = simpleExpr();
 		Symbol op;
-		while ( (op = lexer.token) == Symbol.MULT ||
-                op == Symbol.DIV || op == Symbol.REMAINDER ) {
+		while ((op = lexer.token) == Symbol.MULT || op == Symbol.DIV || op == Symbol.REMAINDER) {
 			lexer.nextToken();
 			right = simpleExpr();
 
@@ -368,8 +413,12 @@ public class Compiler {
 		case IDENT:
 			String name = lexer.getStringValue();
 			ident();
+			
+			Variable v = null;
 
-			Variable v = symbolTable.get(name);
+			for (int i = symbolTableStack.size() - 1; i >= 0 && v == null; i--) {
+				v = symbolTableStack.get(i).get(name);
+			}
 
 			if (v == null)
 				error.signal("Variable " + name + " was not declared");
@@ -382,7 +431,7 @@ public class Compiler {
 		return e;
 	}
 
-	private Hashtable<String, Variable> symbolTable;
+	private ArrayList<Hashtable<String, Variable>> symbolTableStack;
 	private Lexer lexer;
 	private CompilerError error;
 
