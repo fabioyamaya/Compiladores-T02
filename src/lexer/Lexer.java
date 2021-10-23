@@ -33,6 +33,8 @@ public class Lexer {
 		keywordsTable.put("in", Symbol.IN);
 		keywordsTable.put("print", Symbol.PRINT);
 		keywordsTable.put("println", Symbol.PRINTLN);
+		keywordsTable.put("true", Symbol.TRUE);
+		keywordsTable.put("false", Symbol.FALSE);
 	}
 
 	public void nextToken() {
@@ -61,7 +63,18 @@ public class Lexer {
 			}
 			nextToken();
 		} else {
-			if (Character.isLetter(ch)) {
+			if (ch == '\"' && !closingQuotes) {
+				closingQuotes = true;
+				token = Symbol.QUOTATION;
+				tokenPos++;
+				StringBuffer ident = new StringBuffer();
+				while (input[tokenPos] != '\"' && input[tokenPos] != '\0') {
+					ident.append(input[tokenPos]);
+					tokenPos++;
+				}
+				stringValue = ident.toString();
+
+			} else if (Character.isLetter(ch)) {
 				// get an identifier or keyword
 				StringBuffer ident = new StringBuffer();
 				while (Character.isLetter(input[tokenPos]) || Character.isDigit(input[tokenPos])) {
@@ -189,6 +202,10 @@ public class Lexer {
 				case '!':
 					token = Symbol.NOT;
 					break;
+				case '\"':
+					token = Symbol.QUOTATION;
+					closingQuotes = false;
+					break;
 				default:
 					error.signal("Invalid Character: '" + ch + "'");
 				}
@@ -251,4 +268,6 @@ public class Lexer {
 
 	private CompilerError error;
 	private static final int MaxValueInteger = 32768;
+
+	private boolean closingQuotes = false;
 }

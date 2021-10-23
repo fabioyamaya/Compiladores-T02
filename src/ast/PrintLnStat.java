@@ -11,7 +11,11 @@ public class PrintLnStat extends Statement {
 	
 	@Override
 	public void genC(PW pw) {
-		pw.print("printf(\"%d\\n\", ", true);
+		if (expr.getType() == Type.integerType) {
+			pw.print("printf(\"%d\\n\", ", true);
+		} else {
+			pw.print("printf(\"%s\\n\", ", true);
+		}
 		expr.genC(pw);
 		pw.println(");", false);
 	}

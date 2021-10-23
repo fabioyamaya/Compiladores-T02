@@ -14,6 +14,7 @@ public enum Symbol {
     ELSE("else"),
     EOF("eof"),
     EQ("=="),
+    FALSE("false"),
     FOR("for"),
     GE(">="),
     GT(">"),
@@ -34,11 +35,13 @@ public enum Symbol {
     PLUS("+"),
     PRINT("print"),
     PRINTLN("println"),
+    QUOTATION("\""),
     REMAINDER("%"),
     RIGHTCURL("}"),
     RIGHTPAR(")"),
     SEMICOLON(";"),
     STRING("String"),
+    TRUE("true"),
     VAR("var"),
     WHILE("while");
 

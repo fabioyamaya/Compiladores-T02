@@ -16,7 +16,7 @@ public class VarListStat extends Statement {
 		for (Variable v : arrayVariable) {
 			t = v.getType().getCname();
 			if (t.equals("char")) {
-				pw.println(t + " " + v.getName() + "[]" + ";", true);
+				pw.println(t + " *" + v.getName() + " " + "= NULL" +";", true);
 			} else {
 				pw.println(t + " " + v.getName() + ";", true);
 			}

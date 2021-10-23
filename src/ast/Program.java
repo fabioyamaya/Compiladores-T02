@@ -17,10 +17,15 @@ public class Program {
 
 	public void genC(PW pw) {
 		pw.println("#include <stdio.h>", true);
+		pw.println("#include <stdlib.h>", true);
 		pw.println("", false);
 		pw.println("void main() {", true);
-
+		pw.println("", false);
+		
 		pw.add();
+		
+		pw.println("// Variavel usada para gerenciar falha de realloc",true);
+		pw.println("char *tmp = NULL",true);
 
 		pw.println("",true);
 		statementList.genC(pw);

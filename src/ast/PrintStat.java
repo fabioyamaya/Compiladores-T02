@@ -3,16 +3,19 @@ package ast;
 import java.util.Map;
 
 public class PrintStat extends Statement {
-	
+
 	public PrintStat(Expr expr) {
 		super();
 		this.expr = expr;
 	}
 
-	
 	@Override
 	public void genC(PW pw) {
-		pw.print("printf(\"%d\", ", true);
+		if (expr.getType() == Type.integerType) {
+			pw.print("printf(\"%d\", ", true);
+		} else {
+			pw.print("printf(\"%s\", ", true);
+		}
 		expr.genC(pw);
 		pw.println(");", false);
 	}

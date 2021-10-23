@@ -22,5 +22,11 @@ public class NumberExpr extends Expr {
 		return value;
 	}
 
+	@Override
+	public Type getType() {
+		return Type.integerType;
+	}
+
 	private int value;
+
 }

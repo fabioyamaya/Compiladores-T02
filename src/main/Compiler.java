@@ -17,10 +17,12 @@ import ast.PrintStat;
 import ast.Program;
 import ast.Statement;
 import ast.StatementList;
+import ast.StringExpr;
 import ast.UnaryExpr;
 import ast.VarListStat;
 import ast.Variable;
 import ast.WhileStat;
+import ast.BooleanExpr;
 import ast.Type;
 import ast.VariableExpr;
 import lexer.Lexer;
@@ -157,6 +159,9 @@ public class Compiler {
 
 		Expr e = expr();
 
+		if (v.getType() != e.getType())
+			error.signal("Type error in assignment");
+
 		AssignStat assignStat = new AssignStat(v, e);
 
 		if (lexer.token != Symbol.SEMICOLON) {
@@ -174,6 +179,11 @@ public class Compiler {
 
 		lexer.nextToken();
 		Expr e = expr();
+
+		if (e.getType() != Type.booleanType) {
+			error.signal("Expected boolean type expression on if statement");
+		}
+
 		thenPart = statList();
 
 		if (lexer.token == Symbol.ELSE) {
@@ -198,7 +208,7 @@ public class Compiler {
 		if (v != null)
 			error.signal("Variable " + name + " has already been declared");
 
-		v = new Variable(name);
+		v = new Variable(name, Type.integerType);
 
 		if (lexer.token != Symbol.IN) {
 			error.signal("in keyword expected");
@@ -207,12 +217,20 @@ public class Compiler {
 		lexer.nextToken();
 		Expr startExpr = expr();
 
+		if (startExpr.getType() != Type.integerType) {
+			error.signal("Expected integer type expression on for statement");
+		}
+
 		if (lexer.token != Symbol.DOUBLEDOTS) {
 			error.signal(".. keyword expected");
 		}
 
 		lexer.nextToken();
 		Expr endExpr = expr();
+
+		if (endExpr.getType() != Type.integerType) {
+			error.signal("Expected integer type expression on for statement");
+		}
 
 		StatementList s = forStatList(v);
 
@@ -243,26 +261,24 @@ public class Compiler {
 	private StatementList statList() {
 		ArrayList<Statement> arrayStat = new ArrayList<Statement>();
 		Hashtable<String, Variable> symbolTableLocal = new Hashtable<String, Variable>();
-		
 
 		if (lexer.token != Symbol.LEFTCURL) {
 			error.signal("{ expected");
 		}
-		
+
 		symbolTableStack.add(symbolTableLocal);
-		
+
 		lexer.nextToken();
 		while (lexer.token != Symbol.RIGHTCURL) {
 			arrayStat.add(stat());
 		}
 		lexer.nextToken();
-		
-		symbolTableStack.remove(symbolTableStack.size()-1);
+
+		symbolTableStack.remove(symbolTableStack.size() - 1);
 
 		return new StatementList(arrayStat);
 	}
-	
-	
+
 	private StatementList forStatList(Variable forVar) {
 		ArrayList<Statement> arrayStat = new ArrayList<Statement>();
 		Hashtable<String, Variable> symbolTableLocal = new Hashtable<String, Variable>();
@@ -272,16 +288,16 @@ public class Compiler {
 		if (lexer.token != Symbol.LEFTCURL) {
 			error.signal("{ expected");
 		}
-		
+
 		symbolTableStack.add(symbolTableLocal);
-		
+
 		lexer.nextToken();
 		while (lexer.token != Symbol.RIGHTCURL) {
 			arrayStat.add(stat());
 		}
 		lexer.nextToken();
-		
-		symbolTableStack.remove(symbolTableStack.size()-1);
+
+		symbolTableStack.remove(symbolTableStack.size() - 1);
 
 		return new StatementList(arrayStat);
 	}
@@ -290,6 +306,10 @@ public class Compiler {
 		lexer.nextToken();
 
 		Expr e = expr();
+
+		if (e.getType() != Type.booleanType) {
+			error.signal("Expected boolean type expression on while statement");
+		}
 
 		StatementList s = statList();
 
@@ -315,7 +335,9 @@ public class Compiler {
 		if (lexer.token == Symbol.OR) {
 			lexer.nextToken();
 			right = andExpr();
-
+			if (left.getType() != Type.booleanType || right.getType() != Type.booleanType) {
+				error.signal("Expected boolean operand for boolean operator");
+			}
 			left = new CompositeExpr(left, Symbol.OR, right);
 		}
 		return left;
@@ -327,7 +349,9 @@ public class Compiler {
 		if (lexer.token == Symbol.AND) {
 			lexer.nextToken();
 			right = relExpr();
-
+			if (left.getType() != Type.booleanType || right.getType() != Type.booleanType) {
+				error.signal("Expected boolean operand for boolean operator");
+			}
 			left = new CompositeExpr(left, Symbol.AND, right);
 		}
 		return left;
@@ -341,7 +365,8 @@ public class Compiler {
 				|| lexer.token == Symbol.EQ || lexer.token == Symbol.NEQ) {
 			lexer.nextToken();
 			right = addExpr();
-
+			if (left.getType() != right.getType())
+				error.signal("Type error in expression");
 			left = new CompositeExpr(left, op, right);
 		}
 
@@ -356,7 +381,9 @@ public class Compiler {
 		while ((op = lexer.token) == Symbol.PLUS || op == Symbol.MINUS) {
 			lexer.nextToken();
 			right = multExpr();
-
+			if (left.getType() != Type.integerType || right.getType() != Type.integerType) {
+				error.signal("Expected integer operand for arithmetic operator");
+			}
 			left = new CompositeExpr(left, op, right);
 		}
 
@@ -371,7 +398,9 @@ public class Compiler {
 		while ((op = lexer.token) == Symbol.MULT || op == Symbol.DIV || op == Symbol.REMAINDER) {
 			lexer.nextToken();
 			right = simpleExpr();
-
+			if (left.getType() != Type.integerType || right.getType() != Type.integerType) {
+				error.signal("Expected integer operand for arithmetic operator");
+			}
 			left = new CompositeExpr(left, op, right);
 
 		}
@@ -383,6 +412,14 @@ public class Compiler {
 		Expr e = null;
 
 		switch (lexer.token) {
+		case TRUE:
+			lexer.nextToken();
+			e = BooleanExpr.True;
+			break;
+		case FALSE:
+			lexer.nextToken();
+			e = BooleanExpr.False;
+			break;
 		case NUMBER:
 			e = new NumberExpr(lexer.getNumberValue());
 			lexer.nextToken();
@@ -398,22 +435,31 @@ public class Compiler {
 		case NOT:
 			lexer.nextToken();
 			e = expr();
+			if (e.getType() != Type.booleanType) {
+				error.signal("Expected boolean operand after boolean operator");
+			}
 			e = new UnaryExpr(e, Symbol.NOT);
 			break;
 		case PLUS:
 			lexer.nextToken();
 			e = expr();
+			if (e.getType() != Type.integerType) {
+				error.signal("Expected integer operand after arithmetic operator");
+			}
 			e = new UnaryExpr(e, Symbol.PLUS);
 			break;
 		case MINUS:
 			lexer.nextToken();
 			e = expr();
+			if (e.getType() != Type.integerType) {
+				error.signal("Expected integer operand after arithmetic operator");
+			}
 			e = new UnaryExpr(e, Symbol.MINUS);
 			break;
 		case IDENT:
 			String name = lexer.getStringValue();
 			ident();
-			
+
 			Variable v = null;
 
 			for (int i = symbolTableStack.size() - 1; i >= 0 && v == null; i--) {
@@ -424,6 +470,15 @@ public class Compiler {
 				error.signal("Variable " + name + " was not declared");
 
 			e = new VariableExpr(v);
+			break;
+		case QUOTATION:
+			String string = lexer.getStringValue();
+			e = new StringExpr(string);
+			lexer.nextToken();
+			if (lexer.token != Symbol.QUOTATION) {
+				error.signal("\" expected");
+			}
+			lexer.nextToken();
 			break;
 		default:
 			error.signal("Expression expected");
