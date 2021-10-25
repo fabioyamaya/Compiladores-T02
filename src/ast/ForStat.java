@@ -21,7 +21,7 @@ public class ForStat extends Statement {
 		startExpr.genC(pw);
 		pw.print("; ", false);
 		pw.print(v.getName(), false);
-		pw.print(" < ", false);
+		pw.print(" <= ", false);
 		endExpr.genC(pw);
 		pw.print("; ++", false);
 		pw.print(v.getName(), false);

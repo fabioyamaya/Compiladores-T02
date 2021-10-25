@@ -13,6 +13,8 @@ public class PrintLnStat extends Statement {
 	public void genC(PW pw) {
 		if (expr.getType() == Type.integerType) {
 			pw.print("printf(\"%d\\n\", ", true);
+		} else if (expr.getType() == Type.booleanType) {
+			pw.print("printBool(1, ", true);
 		} else {
 			pw.print("printf(\"%s\\n\", ", true);
 		}
