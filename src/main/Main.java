@@ -77,7 +77,7 @@ public class Main {
 		
 		
 		if (args[0].equals("-run")) {
-			Map<String, Integer> memory = new HashMap<>();
+			Map<String, Object> memory = new HashMap<>();
 			
 			if (program != null) {
 				PW pw = new PW();

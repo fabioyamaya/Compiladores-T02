@@ -39,10 +39,20 @@ public class AssignStat extends Statement {
 	}
 
 	@Override
-	public void run(Map<String, Integer> memory) {
+	public void run(Map<String, Object> memory) {
 		memory.put(v.getName(), expr.run(memory));
 	}
 
 	private Variable v;
 	private Expr expr;
+
+	public static void main(String[] args) {
+		int soma = 0;
+		for (int i = 0; i <= 100; i++) {
+			if(i%2 == 0) {
+				soma += i*i;
+			}
+		}
+		System.out.println(soma);
+	}
 }

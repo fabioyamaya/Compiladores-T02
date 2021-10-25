@@ -33,8 +33,8 @@ public class ForStat extends Statement {
 	}
 
 	@Override
-	public void run(Map<String, Integer> memory) {
-		for (int i = startExpr.run(memory); i < endExpr.run(memory); i++) {
+	public void run(Map<String, Object> memory) {
+		for (int i = (Integer) startExpr.run(memory); i <= (Integer) endExpr.run(memory); i++) {
 			memory.put(v.getName(), i);
 			statList.run(memory);
 		}

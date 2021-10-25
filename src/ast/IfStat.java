@@ -30,8 +30,8 @@ public class IfStat extends Statement {
 	}
 
 	@Override
-	public void run(Map<String, Integer> memory) {
-		if (expr.run(memory) != 0) {
+	public void run(Map<String, Object> memory) {
+		if ((Boolean) expr.run(memory)) {
 			thenPart.run(memory);
 		} else if (elsePart != null) {
 			elsePart.run(memory);

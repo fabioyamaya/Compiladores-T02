@@ -21,8 +21,8 @@ public class PrintLnStat extends Statement {
 	}
 
 	@Override
-	public void run(Map<String, Integer> memory) {
-		System.out.println(expr.run(memory));
+	public void run(Map<String, Object> memory) {
+		System.out.println(expr.run(memory).toString());
 	}
 
 	private Expr expr;

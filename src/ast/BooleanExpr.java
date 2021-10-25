@@ -24,9 +24,8 @@ public class BooleanExpr extends Expr {
     }
 
 	@Override
-	public Integer run(Map<String, Integer> memory) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object run(Map<String, Object> memory) {
+		return value;
 	}
 	
 	public static BooleanExpr True  = new BooleanExpr(true);

@@ -30,60 +30,143 @@ public class CompositeExpr extends Expr {
 	}
 
 	@Override
-	public Integer run(Map<String, Integer> memory) {
-		Integer leftValue = left.run(memory);
-		Integer rightValue = right.run(memory);
+	public Object run(Map<String, Object> memory) {
 		switch (oper) {
-		case PLUS -> {
-			return leftValue + rightValue;
-		}
-		case MINUS -> {
-			return leftValue - rightValue;
-		}
-		case OR -> {
-			return leftValue != 0 || rightValue != 0 ? 1 : 0;
-		}
-		case AND -> {
-			return leftValue != 0 && rightValue != 0 ? 1 : 0;
-		}
-		case EQ -> {
-			return leftValue == rightValue ? 1 : 0;
-		}
-		case GE -> {
-			return leftValue >= rightValue ? 1 : 0;
-		}
-		case GT -> {
-			return leftValue > rightValue ? 1 : 0;
-		}
-		case LE -> {
-			return leftValue <= rightValue ? 1 : 0;
-		}
-		case LT -> {
-			return leftValue < rightValue ? 1 : 0;
-		}
-		case REMAINDER -> {
-			return leftValue % rightValue;
-		}
-		case MULT -> {
-			return leftValue * rightValue;
-		}
-		case DIV -> {
-			return leftValue / rightValue;
-		}
-		case NEQ -> {
-			return leftValue != rightValue ? 1 : 0;
-		}
-		default -> {
-			System.out.println("Operador " + oper.toString() + " não implementado");
-			return 0;
-		}
+			//Operação aritmética
+			case PLUS -> {
+				Integer leftValue = (Integer) left.run(memory);
+				Integer rightValue = (Integer) right.run(memory);
+				return leftValue + rightValue;
+			}
+			case MINUS -> {
+				Integer leftValue = (Integer) left.run(memory);
+				Integer rightValue = (Integer) right.run(memory);
+				return leftValue - rightValue;
+			}
+			case MULT -> {
+				Integer leftValue = (Integer) left.run(memory);
+				Integer rightValue = (Integer) right.run(memory);
+				return leftValue * rightValue;
+			}
+			case DIV -> {
+				Integer leftValue = (Integer) left.run(memory);
+				Integer rightValue = (Integer) right.run(memory);
+				return leftValue / rightValue;
+			}
+			case REMAINDER -> {
+				Integer leftValue = (Integer) left.run(memory);
+				Integer rightValue = (Integer) right.run(memory);
+				return leftValue % rightValue;
+			}
+			//Operação booleana
+			case OR -> {
+				Boolean leftValue = (Boolean) left.run(memory);
+				Boolean rightValue = (Boolean) right.run(memory);
+				return leftValue || rightValue;
+			}
+			case AND -> {
+				Boolean leftValue = (Boolean) left.run(memory);
+				Boolean rightValue = (Boolean) right.run(memory);
+				return leftValue && rightValue;
+			}
+			//Operação comum
+			case EQ -> {
+				return left.run(memory).equals(right.run(memory));
+			}
+			case GE -> {
+				Object leftValue = left.run(memory);
+				Object rightValue = right.run(memory);
+				if (leftValue.equals(rightValue)) {
+					return true;
+				}
+				if (left.getType() == Type.booleanType) {
+					//false < true
+					return (Boolean) leftValue;
+				}
+				if (left.getType() == Type.stringType) {
+					String leftString = (String) leftValue;
+					String rightString = (String) rightValue;
+					return leftString.compareTo(rightString) > 0;
+				}
+				Integer leftInt = (Integer) leftValue;
+				Integer rightInt = (Integer) rightValue;
+				return leftInt > rightInt;
+			}
+			case GT -> {
+				Object leftValue = left.run(memory);
+				Object rightValue = right.run(memory);
+				if (leftValue.equals(rightValue)) {
+					return false;
+				}
+				if (left.getType() == Type.booleanType) {
+					//false < true
+					return (Boolean) leftValue;
+				}
+				if (left.getType() == Type.stringType) {
+					String leftString = (String) leftValue;
+					String rightString = (String) rightValue;
+					return leftString.compareTo(rightString) > 0;
+				}
+				Integer leftInt = (Integer) leftValue;
+				Integer rightInt = (Integer) rightValue;
+				return leftInt > rightInt;
+			}
+			case LE -> {
+				Object leftValue = left.run(memory);
+				Object rightValue = right.run(memory);
+				if (leftValue.equals(rightValue)) {
+					return true;
+				}
+				if (left.getType() == Type.booleanType) {
+					//false < true
+					return (Boolean) rightValue;
+				}
+				if (left.getType() == Type.stringType) {
+					String leftString = (String) leftValue;
+					String rightString = (String) rightValue;
+					return leftString.compareTo(rightString) < 0;
+				}
+				Integer leftInt = (Integer) leftValue;
+				Integer rightInt = (Integer) rightValue;
+				return leftInt < rightInt;
+			}
+			case LT -> {
+				Object leftValue = left.run(memory);
+				Object rightValue = right.run(memory);
+				if (leftValue.equals(rightValue)) {
+					return false;
+				}
+				if (left.getType() == Type.booleanType) {
+					//false < true
+					return (Boolean) rightValue;
+				}
+				if (left.getType() == Type.stringType) {
+					String leftString = (String) leftValue;
+					String rightString = (String) rightValue;
+					return leftString.compareTo(rightString) < 0;
+				}
+				Integer leftInt = (Integer) leftValue;
+				Integer rightInt = (Integer) rightValue;
+				return leftInt < rightInt;
+			}
+			case NEQ -> {
+				return !left.run(memory).equals(right.run(memory));
+			}
+			case CONCAT -> {
+				Object leftValue = left.run(memory);
+				Object rightValue = right.run(memory);
+				return leftValue.toString() + rightValue.toString();
+			}
+			default -> {
+				System.out.println("Operador " + oper.toString() + " não implementado");
+				return 0;
+			}
 		}
 
 	}
 
 	@Override
 	public Type getType() {
-
 		// left and right must be the same type
 		if (oper == Symbol.EQ || oper == Symbol.NEQ || oper == Symbol.LE || oper == Symbol.LT || oper == Symbol.GE
 				|| oper == Symbol.GT || oper == Symbol.AND || oper == Symbol.OR)

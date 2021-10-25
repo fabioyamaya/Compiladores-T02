@@ -14,15 +14,17 @@ public class UnaryExpr extends Expr {
 	@Override
 	public void genC(PW pw) {
 		switch (op) {
-		case PLUS:
-			pw.print("+", false);
-			break;
-		case MINUS:
-			pw.print("-", false);
-			break;
-		case NOT:
-			pw.print("!", false);
-			break;
+			//Operação aritmética
+			case PLUS:
+				pw.print("+", false);
+				break;
+			case MINUS:
+				pw.print("-", false);
+				break;
+			//Operação booleana
+			case NOT:
+				pw.print("!", false);
+				break;
 		}
 		if (expr.getClass() == UnaryExpr.class) {
 			pw.print("(", false);
@@ -34,17 +36,18 @@ public class UnaryExpr extends Expr {
 	}
 
 	@Override
-	public Integer run(Map<String, Integer> memory) {
+	public Object run(Map<String, Object> memory) {
 		switch (op) {
-		case PLUS:
-			return +expr.run(memory);
-		case MINUS:
-			return -expr.run(memory);
-		case NOT:
-			return expr.run(memory) == 0 ? 1 : 0;
-		default:
-			System.out.println("Operação " + op.toString() + " não implementada");
-			return 0;
+			case PLUS:
+				return +(Integer)expr.run(memory);
+			case MINUS:
+				return -(Integer)expr.run(memory);
+
+			case NOT:
+				return !(Boolean) expr.run(memory);
+			default:
+				System.out.println("Operação " + op.toString() + " não implementada");
+				return 0;
 		}
 	}
 

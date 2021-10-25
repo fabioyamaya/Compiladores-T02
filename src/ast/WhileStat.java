@@ -21,8 +21,8 @@ public class WhileStat extends Statement {
 	}
 
 	@Override
-	public void run(Map<String, Integer> memory) {
-		while (expr.run(memory) != 0) {
+	public void run(Map<String, Object> memory) {
+		while ((Boolean) expr.run(memory)) {
 			statList.run(memory);
 		}
 	}

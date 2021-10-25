@@ -14,7 +14,7 @@ public class VariableExpr extends Expr {
 	}
 
 	@Override
-	public Integer run(Map<String, Integer> memory) {
+	public Object run(Map<String, Object> memory) {
 		return memory.get(v.getName());
 	}
 

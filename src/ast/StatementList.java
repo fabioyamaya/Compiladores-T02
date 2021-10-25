@@ -18,7 +18,7 @@ public class StatementList {
 
     private ArrayList<Statement> v;
 
-    public void run(Map<String, Integer> memory) {
+    public void run(Map<String, Object> memory) {
         for( Statement s : v ) {
             s.run(memory);
         }

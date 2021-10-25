@@ -17,8 +17,8 @@ public class StringExpr extends Expr{
 	}
 
 	@Override
-	public Integer run(Map<String, Integer> memory) {
-		return 1;
+	public String run(Map<String, Object> memory) {
+		return value;
 	}
 
 	@Override

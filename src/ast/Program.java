@@ -33,7 +33,7 @@ public class Program {
 		pw.println("}", true);
 	}
 
-	public void run(Map<String, Integer> memory) {
+	public void run(Map<String, Object> memory) {
 		statementList.run(memory);
 	}
 

@@ -24,9 +24,8 @@ public class VarListStat extends Statement {
 	}
 
 	@Override
-	public void run(Map<String, Integer> memory) {
+	public void run(Map<String, Object> memory) {
 		// TODO Auto-generated method stub
-
 	}
 
 	private ArrayList<Variable> arrayVariable;
