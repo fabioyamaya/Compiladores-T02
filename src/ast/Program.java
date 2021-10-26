@@ -21,8 +21,24 @@ public class Program {
 		pw.println("#include <string.h>", true);
 		pw.println("", false);
 
+		//Funcao de alocacao de memoria para strings
+		pw.println("// Realiza alocação de memória para strings\r\n"
+				+ "void reallocStr(char **strPtr, int size){\r\n"
+				+ "    char *tmp = NULL;\r\n"
+				+ "\r\n"
+				+ "    tmp = realloc(*strPtr, size + 1);\r\n"
+				+ "\r\n"
+				+ "    if (!tmp) {\r\n"
+				+ "        free(*strPtr);\r\n"
+				+ "        printf(\"Erro na alocacao de memoria\");\r\n"
+				+ "        exit(0);\r\n"
+				+ "    }\r\n"
+				+ "    *strPtr = tmp;\r\n"
+				+ "}", true);
+		pw.println("", false);
+		
 		//FunÃ§Ã£o printbool
-		pw.println(
+		pw.println("// Imprime booleanos com valores true ou false\r\n" +
 				"void printBool(int newline, int bool) {\n" +
 				"    if(bool) {\n" +
 				"        printf(\"true\");  \n" +
@@ -40,9 +56,6 @@ public class Program {
 		pw.println("", false);
 		
 		pw.add();
-		
-		pw.println("// Variavel usada para gerenciar falha de realloc",true);
-		pw.println("char *tmp = NULL",true);
 
 		pw.println("",true);
 		statementList.genC(pw);
