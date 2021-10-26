@@ -59,6 +59,10 @@ public class Program {
 
 		pw.println("",true);
 		statementList.genC(pw);
+		
+		// Libera memoria alocada
+		statementList.genCFreeStr(pw);
+		
 		pw.sub();
 		pw.println("}", true);
 	}

@@ -16,6 +16,14 @@ public class StatementList {
       }
     }
 
+    public void genCFreeStr(PW pw) {
+    	for( Statement s : v ) {
+    		if(s instanceof AssignStat) {
+    			((AssignStat) s).genCFreeStr(pw);
+    		}
+        }
+    }
+    
     private ArrayList<Statement> v;
 
     public void run(Map<String, Object> memory) {
